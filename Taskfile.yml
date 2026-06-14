@@ -1,0 +1,53 @@
+version: "3"
+
+vars:
+  COMPOSE: docker compose
+  POSTGRES_CONTAINER: feedback-postgres
+  POSTGRES_DB: feedback
+  POSTGRES_USER: feedback
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+
+  db:up:
+    desc: Start local PostgreSQL
+    cmds:
+      - "{{.COMPOSE}} up -d postgres"
+
+  db:down:
+    desc: Stop local PostgreSQL
+    cmds:
+      - "{{.COMPOSE}} down"
+
+  db:reset:
+    desc: Recreate local PostgreSQL and remove database volume
+    cmds:
+      - "{{.COMPOSE}} down -v"
+      - "{{.COMPOSE}} up -d postgres"
+
+  db:logs:
+    desc: Follow PostgreSQL logs
+    cmds:
+      - "{{.COMPOSE}} logs -f postgres"
+
+  db:shell:
+    desc: Open psql shell in the PostgreSQL container
+    cmds:
+      - docker exec -it {{.POSTGRES_CONTAINER}} psql -U {{.POSTGRES_USER}} -d {{.POSTGRES_DB}}
+
+  db:status:
+    desc: Show PostgreSQL container status
+    cmds:
+      - "{{.COMPOSE}} ps postgres"
+
+  backend:test:
+    desc: Run Go backend tests
+    dir: app/backend
+    env:
+      GOCACHE: /tmp/go-build-cache
+      GOMODCACHE: /tmp/go-mod-cache
+    cmds:
+      - go test ./...
