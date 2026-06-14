@@ -5,6 +5,8 @@ vars:
   POSTGRES_CONTAINER: feedback-postgres
   POSTGRES_DB: feedback
   POSTGRES_USER: feedback
+  BACKEND_URL: http://localhost:8080
+  FRONTEND_URL: http://localhost:3000
 
 tasks:
   default:
@@ -42,6 +44,39 @@ tasks:
     desc: Show PostgreSQL container status
     cmds:
       - "{{.COMPOSE}} ps postgres"
+
+  app:up:
+    desc: Build and start the full local application stack
+    cmds:
+      - "{{.COMPOSE}} up -d --build"
+
+  app:down:
+    desc: Stop the full local application stack
+    cmds:
+      - "{{.COMPOSE}} down"
+
+  app:reset:
+    desc: Recreate the full local application stack and remove database volume
+    cmds:
+      - "{{.COMPOSE}} down -v"
+      - "{{.COMPOSE}} up -d --build"
+
+  app:logs:
+    desc: Follow logs for all local application services
+    cmds:
+      - "{{.COMPOSE}} logs -f"
+
+  app:status:
+    desc: Show local application container status
+    cmds:
+      - "{{.COMPOSE}} ps"
+
+  app:test:
+    desc: Run a local smoke test against frontend, backend, and database-backed API
+    cmds:
+      - curl -fsS {{.BACKEND_URL}}/health
+      - curl -fsS {{.BACKEND_URL}}/api/feedback/
+      - curl -fsS {{.FRONTEND_URL}}/
 
   backend:test:
     desc: Run Go backend tests
