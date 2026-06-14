@@ -26,8 +26,8 @@ id_ed25519.pub
 
 # AWS and CLI credentials
 .aws/
-credentials
-config
+.aws/credentials
+.aws/config
 
 # Terraform
 **/.terraform/
