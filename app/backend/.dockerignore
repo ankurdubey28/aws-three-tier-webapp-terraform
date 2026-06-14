@@ -1,0 +1,10 @@
+.git
+.gitignore
+Dockerfile
+bin/
+dist/
+coverage.out
+*.test
+*.prof
+tmp/
+*.log
