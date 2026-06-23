@@ -1,0 +1,13 @@
+region      = "us-east-1"
+environment = "dev"
+project     = "feedback"
+
+ssh_key_name     = "your-existing-ec2-keypair-name"
+allowed_ssh_cidr = "YOUR_PUBLIC_IP/32"
+
+frontend_docker_image = "your-dockerhub-user/feedback-frontend:latest"
+backend_docker_image  = "your-dockerhub-user/feedback-backend:latest"
+
+# Optional for private Docker Hub images.
+dockerhub_username = ""
+dockerhub_password = ""
