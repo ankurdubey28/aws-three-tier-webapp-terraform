@@ -48,7 +48,7 @@ module "iam" {
 
   environment  = var.environment
   project      = var.project
-  secrets_arns = []
+  secrets_arns = [module.secrets.db_credentials_secret_arn]
 
   tags = var.tags
 }
@@ -88,6 +88,7 @@ module "bastion" {
   subnet_id            = module.vpc.public_subnet_ids[0]
   security_group_id    = module.security_groups.bastion_sg_id
   iam_instance_profile = module.iam.ec2_instance_profile_name
+
 
   tags = var.tags
 }
@@ -172,10 +173,21 @@ module "backend_asg" {
   docker_image       = var.backend_docker_image
   dockerhub_username = var.dockerhub_username
   dockerhub_password = var.dockerhub_password
-  db_secret_arn      = ""
-  database_url       = local.database_url
+  db_secret_arn      = module.secrets.db_credentials_secret_arn
 
   tags = var.tags
 
-  depends_on = [module.rds]
+  depends_on = [module.rds, module.secrets]
+}
+
+module "secrets" {
+  source = "../../modules/secrets"
+
+  environment = var.environment
+  project     = var.project
+  db_host     = module.rds.db_address
+  db_name     = var.db_name
+  db_password = random_password.db_password.result
+  db_port     = module.rds.db_port
+  db_username = var.db_username
 }

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 apt-get update -y
-apt-get install -y ca-certificates curl docker.io unzip
+apt-get install -y ca-certificates curl docker.io jq unzip
 
 systemctl enable docker
 systemctl start docker
@@ -17,11 +17,17 @@ fi
 
 DATABASE_URL=""
 if [ -n "${db_secret_arn}" ]; then
-  DATABASE_URL="$(aws secretsmanager get-secret-value \
+  DB_SECRET="$(aws secretsmanager get-secret-value \
     --region "${region}" \
     --secret-id "${db_secret_arn}" \
     --query SecretString \
     --output text)"
+  DB_USERNAME="$(echo "$DB_SECRET" | jq -r '.username')"
+  DB_PASSWORD="$(echo "$DB_SECRET" | jq -r '.password')"
+  DB_HOST="$(echo "$DB_SECRET" | jq -r '.host')"
+  DB_PORT="$(echo "$DB_SECRET" | jq -r '.port')"
+  DB_NAME="$(echo "$DB_SECRET" | jq -r '.dbname')"
+  DATABASE_URL="postgres://$DB_USERNAME:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME?sslmode=disable"
 else
   DATABASE_URL="${database_url}"
 fi
